@@ -2,6 +2,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.forms import ModelForm
 from .models import CustomUser
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
 
 class LoginForm(forms.Form):
     email = forms.CharField(label="Email", required=True)
@@ -13,24 +14,31 @@ class LoginForm(forms.Form):
         pword = self.cleaned_data.get('password')
         return authenticate(request, username=auth_email, password=pword)
 
-class RegisterForm(forms.ModelForm):
-    firstname = forms.CharField(label="First name", required=True)
-    lastname = forms.CharField(label="Last name", required=True)
-    email = forms.CharField(label="Email", required=True)
-    password = forms.CharField(label='Password',widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Confirm password',widget=forms.PasswordInput)
 
+class RegisterForm(UserCreationForm):
+    first_name = forms.CharField(label="First name", required=True)
+    last_name = forms.CharField(label="Last name", required=True)
+    email = forms.CharField(label="Email", required=True)        
 
     class Meta:
         model = CustomUser
-        fields = ('firstname','lastname','email', 'password')
+        fields = ('first_name','last_name','email')
 
-    def clean_password2(self):
-        password1 = self.cleaned_data.get("password")
+    def clean_password2(self):        
+        password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
-
+    
         if not password2:
             raise forms.ValidationError("You must confirm your password")
         if password1 != password2:
             raise forms.ValidationError("Password don't match")
         return password2
+
+
+class EditForm(forms.ModelForm):
+    first_name = forms.CharField(label="First name", required=True)
+    last_name = forms.CharField(label="Last name", required=True) 
+
+    class Meta:
+        model = CustomUser
+        fields = ('first_name','last_name','email')     

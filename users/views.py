@@ -1,10 +1,10 @@
 from django.contrib.auth import login, logout, authenticate 
 from django.views.generic import TemplateView
-from django.shortcuts import render, redirect
-from .forms import LoginForm, RegisterForm
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import LoginForm, RegisterForm, EditForm
 from django.contrib import messages 
-from django.http import HttpResponse
 from .models import CustomUser
+from posts.models import Articles
 
 
 
@@ -34,11 +34,15 @@ class LoginView(TemplateView):
             return render(request, "users/login.html", {"form":form})
     
 
-def homepage_form(request):        
-    if request.user.is_authenticated:        
-        return render (request,template_name = 'users/homepage.html')
-    form = LoginForm()
-    return render(request, "users/login.html", {"form":form})
+class HomePageView(TemplateView): 
+        
+    def get(self, request):
+        data = Articles.objects.all()
+        if request.user.is_authenticated:        
+            return render(request,'users/homepage.html', {'data': data})
+        else:            
+            form = LoginForm()
+            return render(request, "users/login.html", {"form":form})
 
 
 class RegisterView(TemplateView): 
@@ -51,14 +55,11 @@ class RegisterView(TemplateView):
 
         form = RegisterForm(request.POST)
         if form.is_valid():
-            test = form.save()
-            
-            test.set_password(form.cleaned_data.get('password'))            
-            username = form.cleaned_data.get('email')
+            test = form.save()                                 
+            username = form.cleaned_data.get('email')            
             # password = form.cleaned_data.get('password')            
-            user = authenticate(username=username, password=password)            
-            return redirect("users:login")
-            
+            user = authenticate(username=username, password=test.set_password(form.cleaned_data.get('password')))            
+            return redirect("users:login")            
         else:
             form = RegisterForm(request.POST)
             return render(request, "users/register.html", {"form":form})
@@ -71,6 +72,45 @@ class LogoutView(TemplateView):
         return redirect('users:login')
 
 
-# class EditView(TemplateView):
-#     def get(self, request):
+class ShowProfileView(TemplateView):
+        
+    model = CustomUser
+    template_name = 'users/userprofile.html'
+
+    def get_context_data(self, *args, **kwargs):
+
+        users = CustomUser.objects.all()
+        context = super(ShowProfileView,self).get_context_data(*args, **kwargs)
+        
+        page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
+        context['page_user'] = page_user
+
+        return context
+
+
+class EditUserView(TemplateView):
+
+    def get(self, request, pk):
+        form = EditForm()
+        users = CustomUser.objects.all()        
+        
+        page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
+        context = {
+                'form': form,
+                'page_user': page_user
+            }
+ 
+        return render(request, "users/edituser.html",context)
+
+    def post(self, request, pk):
+        data = CustomUser.objects.all()
+        form = EditForm(request.POST)
+        if form.is_valid():            
+            form.save()       
+            return redirect("users:homepage")  
+        else:
+            form = form = RegisterForm(request.POST)
+            return render(request, "users/edituser.html", {"form":form})
+        
+
 
