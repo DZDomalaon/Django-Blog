@@ -1,7 +1,7 @@
 from django.contrib.auth import login, logout, authenticate 
 from django.views.generic import TemplateView
-from django.shortcuts import render, redirect
-from .forms import LoginForm, RegisterForm
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import LoginForm, RegisterForm, EditForm
 from django.contrib import messages 
 from .models import CustomUser
 from posts.models import Articles
@@ -35,14 +35,14 @@ class LoginView(TemplateView):
     
 
 class HomePageView(TemplateView): 
-    # data = Articles.objects.all()     
-    # if request.user.is_authenticated:        
-    #     return render (request,template_name= 'users/homepage.html', {'data': data})
-    # form = LoginForm()
-    # return render(request, "users/login.html", {"form":form})
+        
     def get(self, request):
         data = Articles.objects.all()
-        return render(request=request, template_name="users/homepage.html", context={"data":data})
+        if request.user.is_authenticated:        
+            return render(request,'users/homepage.html', {'data': data})
+        else:            
+            form = LoginForm()
+            return render(request, "users/login.html", {"form":form})
 
 
 class RegisterView(TemplateView): 
@@ -72,6 +72,45 @@ class LogoutView(TemplateView):
         return redirect('users:login')
 
 
-# class EditView(TemplateView):
-#     def get(self, request):
+class ShowProfileView(TemplateView):
+        
+    model = CustomUser
+    template_name = 'users/userprofile.html'
+
+    def get_context_data(self, *args, **kwargs):
+
+        users = CustomUser.objects.all()
+        context = super(ShowProfileView,self).get_context_data(*args, **kwargs)
+        
+        page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
+        context['page_user'] = page_user
+
+        return context
+
+
+class EditUserView(TemplateView):
+
+    def get(self, request, pk):
+        form = EditForm()
+        users = CustomUser.objects.all()        
+        
+        page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
+        context = {
+                'form': form,
+                'page_user': page_user
+            }
+ 
+        return render(request, "users/edituser.html",context)
+
+    def post(self, request, pk):
+        data = CustomUser.objects.all()
+        form = EditForm(request.POST)
+        if form.is_valid():            
+            form.save()       
+            return redirect("users:homepage")  
+        else:
+            form = form = RegisterForm(request.POST)
+            return render(request, "users/edituser.html", {"form":form})
+        
+
 

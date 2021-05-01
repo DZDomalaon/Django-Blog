@@ -14,6 +14,7 @@ class LoginForm(forms.Form):
         pword = self.cleaned_data.get('password')
         return authenticate(request, username=auth_email, password=pword)
 
+
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(label="First name", required=True)
     last_name = forms.CharField(label="Last name", required=True)
@@ -32,3 +33,12 @@ class RegisterForm(UserCreationForm):
         if password1 != password2:
             raise forms.ValidationError("Password don't match")
         return password2
+
+
+class EditForm(forms.ModelForm):
+    first_name = forms.CharField(label="First name", required=True)
+    last_name = forms.CharField(label="Last name", required=True) 
+
+    class Meta:
+        model = CustomUser
+        fields = ('first_name','last_name','email')     
