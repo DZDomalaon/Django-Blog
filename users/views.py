@@ -3,8 +3,8 @@ from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from .forms import LoginForm, RegisterForm
 from django.contrib import messages 
-from django.http import HttpResponse
 from .models import CustomUser
+from posts.models import Articles
 
 
 
@@ -34,11 +34,15 @@ class LoginView(TemplateView):
             return render(request, "users/login.html", {"form":form})
     
 
-def homepage_form(request):        
-    if request.user.is_authenticated:        
-        return render (request,template_name = 'users/homepage.html')
-    form = LoginForm()
-    return render(request, "users/login.html", {"form":form})
+class HomePageView(TemplateView): 
+    # data = Articles.objects.all()     
+    # if request.user.is_authenticated:        
+    #     return render (request,template_name= 'users/homepage.html', {'data': data})
+    # form = LoginForm()
+    # return render(request, "users/login.html", {"form":form})
+    def get(self, request):
+        data = Articles.objects.all()
+        return render(request=request, template_name="users/homepage.html", context={"data":data})
 
 
 class RegisterView(TemplateView): 
@@ -51,14 +55,11 @@ class RegisterView(TemplateView):
 
         form = RegisterForm(request.POST)
         if form.is_valid():
-            test = form.save()
-            
-            test.set_password(form.cleaned_data.get('password'))            
-            username = form.cleaned_data.get('email')
+            test = form.save()                                 
+            username = form.cleaned_data.get('email')            
             # password = form.cleaned_data.get('password')            
-            user = authenticate(username=username, password=password)            
-            return redirect("users:login")
-            
+            user = authenticate(username=username, password=test.set_password(form.cleaned_data.get('password')))            
+            return redirect("users:login")            
         else:
             form = RegisterForm(request.POST)
             return render(request, "users/register.html", {"form":form})
