@@ -36,9 +36,6 @@ class RegisterForm(UserCreationForm):
 
 
 class EditForm(forms.ModelForm):
-    first_name = forms.CharField(label="First name", required=True)
-    last_name = forms.CharField(label="Last name", required=True) 
-
     class Meta:
         model = CustomUser
-        fields = ('first_name','last_name','email')     
+        fields = ('first_name','last_name')     

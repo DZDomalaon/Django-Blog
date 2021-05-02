@@ -10,3 +10,9 @@ class AddArticleForm(forms.ModelForm):
     class Meta:
         model = Articles
         fields = ('title', 'description', 'content')
+
+
+class EditArticleForm(forms.ModelForm):
+    class Meta:
+        model = Articles
+        fields = ('title', 'description', 'content')
