@@ -1,18 +1,39 @@
-{% extends 'users/homepage.html' %}
+{% extends 'base.html' %}
 
 {% block head %}
 {% endblock%}
 
+{% block select %}
+
+{% endblock%}
+
 {% block content %}
 
-
-{% if user.id == page_user.id%}
-    <h1>User Profile</h1>
-    {{  page_user.get_full_name }}
-    {{  page_user.email }}
-
-{% else %}
-    Bawal edit dito
-{% endif %}
-
+<div class="container">
+    <div class="text-center">
+        <h1>User Profile</h1>
+        <b>Name: </b> {{  page_user.get_full_name }}
+        <br>
+        <b>Email: </b> {{  page_user.email }}
+    </div>
+    <br>  
+    <div class="text-center">
+        <h1>Articles</h1>
+        {% for post in post_data %}
+            {% if page_user.id == post.owner.id %}
+            <div class="row align-items-center mb-2 mt-2">
+                <div class="col">    
+                    <h2>
+                        <a href="{% url 'posts:postpage' post.id %}">{{ post.title }}</a>
+                    </h2>
+                </div>
+                <div class="col">
+                    <a href="{% url 'posts:deletepost' post.id %}" class="btn btn-outline-danger">Delete</a>
+                </div>
+            </div>                                    
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+  
 {% endblock%}

@@ -73,17 +73,19 @@ class LogoutView(TemplateView):
 
 
 class ShowProfileView(TemplateView):
-        
-    model = CustomUser
+            
     template_name = 'users/userprofile.html'
 
     def get_context_data(self, *args, **kwargs):
-
-        users = CustomUser.objects.all()
+        
+        post_data = Articles.objects.all() 
         context = super(ShowProfileView,self).get_context_data(*args, **kwargs)
         
         page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
-        context['page_user'] = page_user
+        context = {
+                'post_data': post_data,
+                'page_user': page_user
+            }
 
         return context
 
@@ -91,25 +93,23 @@ class ShowProfileView(TemplateView):
 class EditUserView(TemplateView):
 
     def get(self, request, pk):
-        form = EditForm()
-        users = CustomUser.objects.all()        
-        
+
+        form = EditForm()              
         page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
         context = {
                 'form': form,
                 'page_user': page_user
             }
- 
         return render(request, "users/edituser.html",context)
 
-    def post(self, request, pk):
-        data = CustomUser.objects.all()
-        form = EditForm(request.POST)
-        if form.is_valid():            
-            form.save()       
+    def post(self, request, pk):        
+        form = EditForm(request.POST, instance=request.user)        
+        if form.is_valid(): 
+            update_user = form.save(commit=False)
+            update_user.save()                        
             return redirect("users:homepage")  
         else:
-            form = form = RegisterForm(request.POST)
+            form = EditForm(request.POST, instance=request.user)
             return render(request, "users/edituser.html", {"form":form})
         
 
