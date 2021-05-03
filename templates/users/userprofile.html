@@ -27,9 +27,6 @@
                         <a href="{% url 'posts:postpage' post.id %}">{{ post.title }}</a>
                     </h2>
                 </div>
-                <div class="col">
-                    <a href="{% url 'posts:deletepost' post.id %}" class="btn btn-outline-danger">Delete</a>
-                </div>
             </div>                                    
             {% endif %}
         {% endfor %}

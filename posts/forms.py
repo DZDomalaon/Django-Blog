@@ -13,6 +13,14 @@ class AddArticleForm(forms.ModelForm):
 
 
 class EditArticleForm(forms.ModelForm):
+
     class Meta:
         model = Articles
         fields = ('title', 'description', 'content')
+
+
+class ArticleCommentsForm(forms.ModelForm):
+
+    class Meta:
+        model = ArticleComments
+        fields = ('comment',)

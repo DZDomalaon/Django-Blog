@@ -10,7 +10,6 @@ from posts.models import Articles
 
 # Create your views here.
 class LoginView(TemplateView):
-
     
     def get(self, request):
         form = LoginForm()
@@ -92,24 +91,24 @@ class ShowProfileView(TemplateView):
 
 class EditUserView(TemplateView):
 
-    def get(self, request, pk):
-
-        form = EditForm()              
-        page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
+    def get(self, request, **kwargs):
+        page_user = get_object_or_404(CustomUser, **kwargs)          
+        form = EditForm(instance=request.user)                      
         context = {
                 'form': form,
                 'page_user': page_user
-            }
+            }        
         return render(request, "users/edituser.html",context)
 
-    def post(self, request, pk):        
-        form = EditForm(request.POST, instance=request.user)        
+    def post(self, request, *args, **kwarg):                              
+
+        form = EditForm(request.POST or None, instance=request.user, initial=initial_data)              
         if form.is_valid(): 
             update_user = form.save(commit=False)
             update_user.save()                        
             return redirect("users:homepage")  
         else:
-            form = EditForm(request.POST, instance=request.user)
+            form = EditForm(request.POST,  initial=initial_data)
             return render(request, "users/edituser.html", {"form":form})
         
 
