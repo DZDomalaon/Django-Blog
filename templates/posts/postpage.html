@@ -12,11 +12,41 @@
     <h4>{{ data.description }}</h4>
     <p>{{ data.content }}</p>
     
-    {% if data.owner.id == user.id %}
-        <div class="text-center">
-            <a class="btn btn-primary" href="{% url 'posts:editpost' data.pk %}" role="button">Edit Article</a>
+    <div class="row align-items-center ml-1 mr-1">
+        <div class="col">            
+            <a onclick="myFunction()" href="#">Add Comment</a>
+            |
+            <a href="#">Like</a>
+        </div>
+    </div>
+    <div id="PostComment">
+    </div>
+    <br>
+
+    {% if data.owner.id == user.id %}        
+        <div class="row align-items-center">
+            <div class="col">    
+                <div class="text-center">
+                    <a class="btn btn-primary" href="{% url 'posts:editpost' data.pk %}" role="button">Edit Article</a>
+                </div>
+            </div>
+            <br>
+            <div class="col">
+                <a href="{% url 'posts:deletepost' data.id %}" class="btn btn-outline-danger">Delete</a>
+            </div>
         </div>		 
     {% endif %}	
 </div>  
 
 {% endblock %}
+
+<script>
+    function myFunction() {
+      var x = document.getElementById("PostComment");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    }
+</script>
