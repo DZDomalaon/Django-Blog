@@ -22,8 +22,7 @@ class LoginView(TemplateView):
             user = form.auth(request)                    
             if user is not None:
                 login(request, user)                             
-                return redirect("users:homepage")
-                
+                return redirect("users:homepage")                
             else:                   
                 form = LoginForm(request.POST)            
                 messages.error(request,"Invalid username or password.")
@@ -72,18 +71,18 @@ class LogoutView(TemplateView):
 
 
 class ShowProfileView(TemplateView):
-            
+    
     template_name = 'users/userprofile.html'
 
     def get_context_data(self, *args, **kwargs):
-        
-        post_data = Articles.objects.all() 
+        #import pdb; pdb.set_trace()
+        post_data = Articles.objects.filter(owner=self.request.user).order_by('-date_created')
         context = super(ShowProfileView,self).get_context_data(*args, **kwargs)
         
         page_user = get_object_or_404(CustomUser, id=self.kwargs['pk'])    
         context = {
                 'post_data': post_data,
-                'page_user': page_user
+                'page_user': page_user,
             }
 
         return context
@@ -100,16 +99,22 @@ class EditUserView(TemplateView):
             }        
         return render(request, "users/edituser.html",context)
 
-    def post(self, request, *args, **kwarg):                              
-
-        form = EditForm(request.POST or None, instance=request.user, initial=initial_data)              
-        if form.is_valid(): 
+    def post(self, request, *args, **kwargs):    
+                          
+        initial_data = {
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+            }
+            
+        form = EditForm(request.POST, instance=request.user, initial=initial_data) 
+        page_user = get_object_or_404(CustomUser, **kwargs)              
+        if form.is_valid():                         
             update_user = form.save(commit=False)
-            update_user.save()                        
-            return redirect("users:homepage")  
+            update_user.save()                             
+            return redirect("users:profile", request.user.id)  
         else:
-            form = EditForm(request.POST,  initial=initial_data)
-            return render(request, "users/edituser.html", {"form":form})
+            form = EditForm(request.POST,  initial=initial_data)        
+            return render(request, "users/edituser.html", {'form':form, 'page_user':page_user})
         
 
 
