@@ -1,52 +1,81 @@
 {% extends 'base.html' %}
+{% load static %} 
 
-{% block head %}       
-{% endblock%}
-
-{% block content %}
-
-<div class="text-center">     
-    <h2>
-        {{ data.title }}</a>
-    </h2>
-    <h4>{{ data.description }}</h4>
-    <p>{{ data.content }}</p>
-    
-    <div class="row align-items-center ml-1 mr-1">
-        <div class="col">            
-            <a onclick="myFunction()" href="#">Add Comment</a>
-            |
-            <a href="#">Like</a>
-        </div>
-    </div>
-    <div id="PostComment">
-    </div>
-    <br>
-
-    {% if data.owner.id == user.id %}        
-        <div class="row align-items-center">
-            <div class="col">    
-                <div class="text-center">
-                    <a class="btn btn-primary" href="{% url 'posts:editpost' data.pk %}" role="button">Edit Article</a>
-                </div>
-            </div>
-            <br>
-            <div class="col">
-                <a href="{% url 'posts:deletepost' data.id %}" class="btn btn-outline-danger">Delete</a>
-            </div>
-        </div>		 
-    {% endif %}	
-</div>  
-
+{% block header %}
+<link rel="stylesheet" type="text/css" href="{% static 'posts/CSS/postpage.css' %}">
+<script type="text/javascript" src="{% static 'posts/JS/postpage.js' %}"></script>
 {% endblock %}
 
-<script>
-    function myFunction() {
-      var x = document.getElementById("PostComment");
-      if (x.style.display === "none") {
-        x.style.display = "block";
-      } else {
-        x.style.display = "none";
-      }
-    }
-</script>
+{% block content %}
+<div class="main-wrapper">	    
+    <article class="px-5 py-5 p-md-1">
+        <div class="container">
+            <header">
+                <div class="row">  
+                    <div class="col">    
+                        <h2 class="mb-2">{{ page_post.title }}</h2>
+                    </div>
+                    <div class="col">     
+                        {% if page_post.owner.id == user.id %}        
+                            <a class="btn btn-outline-primary" href="{% url 'posts:editpost' page_post.pk %}" role="button">Edit Article</a>
+                            <a href="{% url 'posts:deletepost' page_post.id %}" class="btn btn-outline-danger">Delete</a> 
+                        {% endif %}               
+                    </div>
+                </div>                
+                <div class="mb-3"><span class="date">Published {{ page_post.date_created }}</span></div>
+                <h6 class="mb-2">{{ page_post.description }}</h6>
+            </header>
+            
+            <div class="blog-post-body">
+                <p>{{ page_post.content }} </p>
+            </div>
+        </div>
+    </article>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">                
+                {% for getcomment in post_comment %}
+                    {% if page_post.id == getcomment.article.id %}
+                    <div class="card mb-2" style="width: 20rem;">
+                        <div class="card-body">                                      
+                            <h5 class="card-title">{{ getcomment.user.get_full_name }}</h5>              
+                            <p class="card-text">{{ getcomment.comment }}</p>
+                            <div id="editcomment">
+                                {% for field in form %}
+                                    {{ field }}                            
+                                {% endfor %}
+                                <a class="btn btn-outline-secondary btn-sm">Save</a>
+                            </div>
+                            {% if getcomment.user.id == user.id %}
+                                <button class="btn btn-outline-primary btn-sm" onclick="myFunction()">Edit Comment</button>
+                                <a class="btn btn-outline-danger btn-sm" href="{% url 'posts:deletecomment' getcomment.pk %}" class="card-link">Delete Comment</a>
+                            {% endif %}                                                    
+                        </div>
+                    </div>
+                    {% endif %} 
+                {% endfor %} 
+            </div>
+            <div class="col">
+                <div class="text-center">      
+                    <form method="POST" action="{% url 'posts:addcomment' page_post.id %}">
+                        {% csrf_token %}                   
+                        {% for field in form %}
+                            {{ field }}
+                        {% endfor %}                        
+                        <br>
+                        <div class="row align-items-center ml-1 mr-1 mt-2 mb-4">
+                            <div class="col">            
+                                <button type="submit" class="btn btn-secondary btn-sm">Add Comment</button>
+                                |
+                                <a href="#" class="btn btn-primary btn-sm">Like</a>
+                            </div>
+                        </div>
+                    </form>              
+                </div>  
+            </div>
+        </div>        
+    </div>    
+</div>
+
+{% endblock %}

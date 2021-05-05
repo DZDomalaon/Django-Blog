@@ -1,4 +1,5 @@
 from django.contrib.auth import login, logout, authenticate
+from django.core.validators import RegexValidator
 from django.forms import ModelForm
 from .models import CustomUser
 from django import forms
@@ -14,10 +15,12 @@ class LoginForm(forms.Form):
         pword = self.cleaned_data.get('password')
         return authenticate(request, username=auth_email, password=pword)
 
+alphabet = RegexValidator(r'^[a-zA-Z]*$', 'Only alphabet characters are allowed.')
 
 class RegisterForm(UserCreationForm):
-    first_name = forms.CharField(label="First name", required=True)
-    last_name = forms.CharField(label="Last name", required=True)
+        
+    first_name = forms.CharField(label="First name", required=True, validators=[alphabet])
+    last_name = forms.CharField(label="Last name", required=True, validators=[alphabet])
     email = forms.CharField(label="Email", required=True)        
 
     class Meta:
@@ -34,8 +37,11 @@ class RegisterForm(UserCreationForm):
             raise forms.ValidationError("Password don't match")
         return password2
 
-
 class EditForm(forms.ModelForm):
+    
+    first_name = forms.CharField(label="First name", required=True, validators=[alphabet])
+    last_name = forms.CharField(label="Last name", required=True, validators=[alphabet])
+
     class Meta:
         model = CustomUser
         fields = ('first_name','last_name')     
